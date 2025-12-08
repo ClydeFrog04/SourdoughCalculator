@@ -9,24 +9,23 @@
  * reference https://medium.com/front-end-weekly/how-to-combine-context-providers-for-cleaner-react-code-9ed24f20225e
  * but modified to be compatible with React 18 woot!
  */
-import React, {JSX, PropsWithChildren} from "react";
+import React, {ReactNode} from "react";
 import {StateContextProvider} from "./StateContext";
 
+type Provider = React.ComponentType<{ children?: ReactNode }>;
 
-const combineContexts =  (...contexts: React.FC<JSX.Element>[]) => {
-    return contexts.reduce(
-        (AccumulatedContexts, CurrentContext:React.FC<any>) => {
-            return  ({children}: PropsWithChildren<React.FC>): JSX.Element => {
-                return (
-                    <AccumulatedContexts>
-                        <CurrentContext>{children}</CurrentContext>
-                    </AccumulatedContexts>
-                );
-            };
-        },
-        ({children}: PropsWithChildren<any>) => <>{children}</>
-    )
-}
+
+const combineContexts = (...providers: Provider[]): Provider => {
+    return providers.reduce(
+        (AccumulatedProvider, CurrentProvider): Provider =>
+            ({children}) => (
+                <AccumulatedProvider>
+                    <CurrentProvider>{children}</CurrentProvider>
+                </AccumulatedProvider>
+            ),
+        ({children}) => <>{children}</>
+    );
+};
 
 const providers = [
     StateContextProvider,
